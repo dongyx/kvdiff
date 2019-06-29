@@ -21,6 +21,7 @@ setuptools.setup(
 		]
 	},
 
+	license="MIT",
 	python_requires=">=3.5",
 	classifiers=[
 		"Programming Language :: Python :: 3",
