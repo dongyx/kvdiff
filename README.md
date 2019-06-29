@@ -5,7 +5,7 @@ Compare two text files by key columns
 # Requirements
 
 + Python >=3.5
-+ [sort(1)][http://man7.org/linux/man-pages/man1/sort.1.html]
++ [sort(1)](http://man7.org/linux/man-pages/man1/sort.1.html)
 
 # Installation
 
