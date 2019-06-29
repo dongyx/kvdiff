@@ -13,7 +13,7 @@ Compare two text files by key columns
 
 # Usage
 
-Run `kvdiff --help` for more infomation.
+Run `kvdiff --help` for more infomation
 
 # Technical details
 
