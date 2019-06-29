@@ -7,7 +7,7 @@ with open("README.md", 'r') as fp:
 
 setuptools.setup(
 	name="kvdiff",
-	version="0.0.0",
+	version="0.0.1",
 	author="Yuxuan Dong",
 	author_email="yuxuan.dong@outlook.com",
 	description="Compare two text files by key columns",
