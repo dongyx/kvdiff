@@ -13,12 +13,12 @@ Compare two text files by key columns
 
 # Usage
 
-	Run `kvdiff --help` for more infomation.
+Run `kvdiff --help` for more infomation.
 
 # Technical details
 
-	See [KVDiff: Compare Two Large Text Files by Key Columns](http://yxdong.me/posts/kvdiff.html)
+See [KVDiff: Compare Two Large Text Files by Key Columns](http://yxdong.me/posts/kvdiff.html)
 
 # License
 
-	MIT licensed
+MIT licensed
