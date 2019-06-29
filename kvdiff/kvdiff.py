@@ -7,6 +7,8 @@ import tempfile
 import argparse
 from argparse import ArgumentDefaultsHelpFormatter
 
+__version__ = "0.0.2"
+
 def main():
 	try:
 		parseargs()
@@ -50,6 +52,8 @@ def parseargs():
 	parser.add_argument("-d", "--delimiter", dest="delimiter", action="store",
 		metavar="DELIMITER", default=' ',
 		help="use DELIMITER as the field separator character\n(default: the blank character)")
+
+	parser.add_argument("--version", action="version", version="%(prog)s " + __version__)
 
 	args = parser.parse_args()
 
@@ -112,7 +116,8 @@ def printdeleted(line):
 	print('-', line)
 
 def printchanged(original, changed):
-	print('|', original, '>', changed)
+	print('*', original)
+	print('>', changed)
 
 if __name__ == "__main__":
 	exit(main())

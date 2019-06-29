@@ -1,13 +1,13 @@
 import setuptools
-import sys
-import os
+
+from kvdiff.kvdiff import __version__ as version
 
 with open("README.md", 'r') as fp:
 	longdesc = fp.read()
 
 setuptools.setup(
 	name="kvdiff",
-	version="0.0.1",
+	version=version,
 	author="Yuxuan Dong",
 	author_email="yuxuan.dong@outlook.com",
 	description="Compare two text files by key columns",

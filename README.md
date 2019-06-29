@@ -15,10 +15,10 @@ Compare two text files by key columns
 
 Run `kvdiff --help` for more infomation
 
-# Technical details
-
-See [KVDiff: Compare Two Large Text Files by Key Columns](http://yxdong.me/posts/kvdiff.html)
-
 # License
 
 MIT licensed
+
+# Technical details
+
+See [KVDiff: Compare Two Large Text Files by Key Columns](http://yxdong.me/posts/kvdiff.html)
