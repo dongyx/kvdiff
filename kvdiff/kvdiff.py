@@ -15,8 +15,8 @@ def main():
 
 		with open(file1, mode='r') as fp1, \
 			open(file2, mode='r') as fp2, \
-			subprocess.Popen(sort_cmd, stdin=fp1, stdout=subprocess.PIPE) as proc1, \
-			subprocess.Popen(sort_cmd, stdin=fp2, stdout=subprocess.PIPE) as proc2:
+			subprocess.Popen(sort_cmd, stdin=fp1, stdout=subprocess.PIPE, text=True, encoding="UTF-8") as proc1, \
+			subprocess.Popen(sort_cmd, stdin=fp2, stdout=subprocess.PIPE, text=True, encoding="UTF-8") as proc2:
 
 			mergecmp(proc1.stdout, proc2.stdout)
 
@@ -51,59 +51,49 @@ def parseargs():
 
 
 def mergecmp(fp1, fp2):
-	buf1 = readline(fp1)
-	buf2 = readline(fp2)
+	record1 = fp1.readline()
+	record2 = fp2.readline()
 
-	while buf1 and buf2:
-		record1 = rstrip(buf1)
-		record2 = rstrip(buf2)
+	while record1 and record2:
 
 		keys1 = getkeys(record1)
 		keys2 = getkeys(record2)
 
 		if keys2 < keys1:
 			printadded(record2)
-			buf2 = readline(fp2)
+			record2 = fp2.readline()
 
 		elif keys2 > keys1:
 			printdeleted(record1)
-			buf1 = readline(fp1)
+			record1 = fp1.readline()
 
 		else:
 			if record1 != record2:
 				printchanged(record1, record2)
-			buf1 = readline(fp1)
-			buf2 = readline(fp2)
+			record1 = fp1.readline()
+			record2 = fp2.readline()
 
-	if buf1:
-		printdeleted(rstrip(buf1))
-	for line in fp1:
-		printdeleted(rstrip(line))
+	while record1:
+		printdeleted(record1)
+		record1 = fp1.readline()
 
-	if buf2:
-		printadded(rstrip(buf2))
-	for line in fp2:
-		printadded(rstrip(line))
+	while record2:
+		printadded(record2)
+		record2 = fp2.readline()
 
 def getkeys(line):
 	columns = line.split(args.delimiter)
 	return [columns[i - 1] for i in args.keys]
 
-def readline(fp):
-	return fp.readline().decode("UTF-8")
-
-def rstrip(s):
-	return s.rstrip('\n')
-
 def printadded(line):
-	print('+', line)
+	print('+', line, end='')
 
 def printdeleted(line):
-	print('-', line)
+	print('-', line, end='')
 
 def printchanged(original, changed):
-	print('*', original)
-	print('>', changed)
+	print('*', original, end='')
+	print('>', changed, end='')
 
 if __name__ == "__main__":
 	exit(main())
