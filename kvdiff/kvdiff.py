@@ -51,8 +51,8 @@ def parseargs():
 
 
 def mergecmp(fp1, fp2):
-	record1 = fp1.readline()
-	record2 = fp2.readline()
+	record1 = readline(fp1)
+	record2 = readline(fp2)
 
 	while record1 and record2:
 
@@ -61,25 +61,38 @@ def mergecmp(fp1, fp2):
 
 		if keys2 < keys1:
 			printadded(record2)
-			record2 = fp2.readline()
+			record2 = readline(fp2)
 
 		elif keys2 > keys1:
 			printdeleted(record1)
-			record1 = fp1.readline()
+			record1 = readline(fp1)
 
 		else:
 			if record1 != record2:
 				printchanged(record1, record2)
-			record1 = fp1.readline()
-			record2 = fp2.readline()
+			record1 = readline(fp1)
+			record2 = readline(fp2)
 
 	while record1:
 		printdeleted(record1)
-		record1 = fp1.readline()
+		record1 = readline(fp1)
 
 	while record2:
 		printadded(record2)
-		record2 = fp2.readline()
+		record2 = readline(fp2)
+
+
+def readline(fp):
+	"""
+	line is either str with '\n' or None, so after splitting, the last key will be (KEYS[-1] + '\n')
+	if file end without '\n', '\n' will be added to the last line
+	NOTE: some sort utility will always output '\n' at file end whether the original file contains '\n' at file end
+	"""
+	line = fp.readline()
+	if not line: return None
+	if line[-1] != '\n':
+		line += '\n'
+	return line
 
 def getkeys(line):
 	columns = line.split(args.delimiter)
