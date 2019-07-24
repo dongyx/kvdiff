@@ -7,7 +7,7 @@ import tempfile
 import argparse
 from argparse import ArgumentDefaultsHelpFormatter
 
-__version__ = "0.0.3"
+__version__ = "0.0.4"
 
 def main():
 	try:
@@ -39,8 +39,7 @@ def parseargs():
 
 	parser = argparse.ArgumentParser(
 		description="Compare two text files by key columns",
-		epilog="CAVEAT: The behavior is undefined if there're duplicated keys within a file\n\n \
-		\nAuthor: Yuxuan Dong")
+		epilog="CAVEAT: The behavior is undefined if there're duplicated keys within a file")
 
 	parser.add_argument(dest="filenames", metavar="FILENAME", nargs=2)
 
