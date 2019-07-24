@@ -15,8 +15,8 @@ def main():
 
 		with open(file1, mode='r') as fp1, \
 			open(file2, mode='r') as fp2, \
-			subprocess.Popen(sort_cmd, stdin=fp1, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as proc1, \
-			subprocess.Popen(sort_cmd, stdin=fp2, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as proc2:
+			subprocess.Popen(sort_cmd, stdin=fp1, stdout=subprocess.PIPE) as proc1, \
+			subprocess.Popen(sort_cmd, stdin=fp2, stdout=subprocess.PIPE) as proc2:
 
 			mergecmp(proc1.stdout, proc2.stdout)
 
