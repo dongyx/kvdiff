@@ -19,8 +19,7 @@ def main():
 			tempfile.TemporaryFile("w+") as sorted_fp1, \
 			tempfile.TemporaryFile("w+") as sorted_fp2:
 
-			sort_args = ["-u", "-t", args.delimiter] \
-				+ sum([["-k", str(key)] for key in args.keys], [])
+			sort_args = sum([["-k{0},{0}".format(str(key))] for key in args.keys], ["-u", "-t", args.delimiter])
 
 			external_sort(fp1, sorted_fp1, sort_args)
 			external_sort(fp2, sorted_fp2, sort_args)
