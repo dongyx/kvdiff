@@ -3,9 +3,7 @@
 
 import sys
 import subprocess
-import tempfile
 import argparse
-from argparse import ArgumentDefaultsHelpFormatter
 
 __version__ = "0.0.4"
 
@@ -13,21 +11,14 @@ def main():
 	try:
 		parseargs()
 		file1, file2 = args.filenames
+		sort_cmd = sum([["-k{0},{0}".format(str(key))] for key in args.keys], ["sort", "-u", "-t", args.delimiter])
 
 		with open(file1, mode='r') as fp1, \
 			open(file2, mode='r') as fp2, \
-			tempfile.TemporaryFile("w+") as sorted_fp1, \
-			tempfile.TemporaryFile("w+") as sorted_fp2:
+			subprocess.Popen(sort_cmd, stdin=fp1, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as proc1, \
+			subprocess.Popen(sort_cmd, stdin=fp2, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as proc2:
 
-			sort_args = sum([["-k{0},{0}".format(str(key))] for key in args.keys], ["-u", "-t", args.delimiter])
-
-			external_sort(fp1, sorted_fp1, sort_args)
-			external_sort(fp2, sorted_fp2, sort_args)
-
-			sorted_fp1.seek(0)
-			sorted_fp2.seek(0)
-
-			mergecmp(sorted_fp1, sorted_fp2)
+			mergecmp(proc1.stdout, proc2.stdout)
 
 		return 0
 	except Exception as e:
@@ -58,16 +49,10 @@ def parseargs():
 	if len(args.delimiter) != 1:
 		raise ValueError("DELIMITER must be a character")
 
-def external_sort(infp, outfp, args):
-	try:
-		return subprocess.run(["sort"] + args,
-			stdin=infp, stdout=outfp, check=True)
-	except FileNotFoundError:
-		raise FileNotFoundError("The sort utility must be installed on the system")
 
 def mergecmp(fp1, fp2):
-	buf1 = fp1.readline()
-	buf2 = fp2.readline()
+	buf1 = readline(fp1)
+	buf2 = readline(fp2)
 
 	while buf1 and buf2:
 		record1 = rstrip(buf1)
@@ -78,17 +63,17 @@ def mergecmp(fp1, fp2):
 
 		if keys2 < keys1:
 			printadded(record2)
-			buf2 = fp2.readline()
+			buf2 = readline(fp2)
 
 		elif keys2 > keys1:
 			printdeleted(record1)
-			buf1 = fp1.readline()
+			buf1 = readline(fp1)
 
 		else:
 			if record1 != record2:
 				printchanged(record1, record2)
-			buf1 = fp1.readline()
-			buf2 = fp2.readline()
+			buf1 = readline(fp1)
+			buf2 = readline(fp2)
 
 	if buf1:
 		printdeleted(rstrip(buf1))
@@ -104,8 +89,11 @@ def getkeys(line):
 	columns = line.split(args.delimiter)
 	return [columns[i - 1] for i in args.keys]
 
+def readline(fp):
+	return fp.readline().decode("UTF-8")
+
 def rstrip(s):
-	return s.rstrip("\n")
+	return s.rstrip('\n')
 
 def printadded(line):
 	print('+', line)
