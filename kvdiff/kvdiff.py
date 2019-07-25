@@ -4,28 +4,26 @@
 import sys
 import subprocess
 import argparse
-import locale
-import os
 
-__version__ = "0.0.4"
+__version__ = "0.1.0"
 
 def main():
 	try:
 		parseargs()
 		file1, file2 = args.filenames
-		env = os.environ.copy()
-		env['LC_ALL'] = args.encoding
-		language_code, encoding = args.encoding.split('.')
-		sort_cmd = sum([["-k{0},{0}".format(str(key))] for key in args.keys], ["sort", "-u", "-t", args.delimiter])
 
 		with open(file1, mode='rb') as fp1, \
 			open(file2, mode='rb') as fp2, \
-			subprocess.Popen(sort_cmd, env=env, stdin=fp1, stdout=subprocess.PIPE, text=True, encoding=encoding) as proc1, \
-			subprocess.Popen(sort_cmd, env=env, stdin=fp2, stdout=subprocess.PIPE, text=True, encoding=encoding) as proc2:
+			external_sort(fp1) as sort1, \
+			external_sort(fp2) as sort2:
 
-			mergecmp(proc1.stdout, proc2.stdout, encoding)
+			mergecmp(sort1.stdout, sort2.stdout)
+
+		if sort1.returncode != 0 or sort2.returncode !=0:
+			raise RuntimeError("sort(1) exits with non-zero code")
 
 		return 0
+		
 	except Exception as e:
 		print(e, file=sys.stderr)
 		return -1
@@ -47,10 +45,6 @@ def parseargs():
 		metavar="DELIMITER", default=' ',
 		help="use DELIMITER as the field separator character\n(default: the blank character)")
 
-	parser.add_argument("-e", "--encoding", dest="encoding", action="store",
-		metavar="ENCODING", default='.'.join(locale.getlocale(locale.LC_ALL)),
-		help="use ENCODING as the file encoding\n")
-
 	parser.add_argument("--version", action="version", version="%(prog)s " + __version__)
 
 	args = parser.parse_args()
@@ -58,11 +52,17 @@ def parseargs():
 	if len(args.delimiter) != 1:
 		raise ValueError("DELIMITER must be a character")
 
+def external_sort(fp):
+	sort_cmd = sum([["-k{0},{0}".format(str(key))] for key in args.keys], ["sort", "-u", "-t", args.delimiter])
 
-def mergecmp(fp1, fp2, outencoding):
+	try:
+		return subprocess.Popen(sort_cmd,
+			stdin=fp, stdout=subprocess.PIPE, text=True)
 
-	sys.stdout.reconfigure(encoding=outencoding)
+	except FileNotFoundError:
+		raise FileNotFoundError("sort(1) must be installed")
 
+def mergecmp(fp1, fp2):
 	record1 = readline(fp1)
 	record2 = readline(fp2)
 
@@ -96,12 +96,15 @@ def mergecmp(fp1, fp2, outencoding):
 
 def readline(fp):
 	"""
-	line is either str with '\n' or None, so after splitting, the last key will be (KEYS[-1] + '\n')
-	if file end without '\n', '\n' will be added to the last line
-	NOTE: some sort utility will always output '\n' at file end whether the original file contains '\n' at file end
+	a line is either a str with '\n' or None, so after splitting, the last key will be (KEYS[-1] + '\n')
+	if the file ends without '\n', '\n' will be added to the last line
+	NOTE: some sort(1) implements will always output '\n' at the end of file whether the original file contains '\n' at the end
 	"""
+
 	line = fp.readline()
+
 	if not line: return None
+
 	if line[-1] != '\n':
 		line += '\n'
 	return line
@@ -110,15 +113,18 @@ def getkeys(line):
 	columns = line.split(args.delimiter)
 	return [columns[i - 1] for i in args.keys]
 
+def output(*s):
+	return print(*s, end='')
+
 def printadded(line):
-	print('+', line, end='')
+	output('+', line)
 
 def printdeleted(line):
-	print('-', line, end='')
+	output('-', line)
 
 def printchanged(original, changed):
-	print('*', original, end='')
-	print('>', changed, end='')
+	output('*', original)
+	output('>', changed)
 
 if __name__ == "__main__":
 	exit(main())
