@@ -3,9 +3,9 @@
 
 import sys
 import subprocess
-import tempfile
 import argparse
-from argparse import ArgumentDefaultsHelpFormatter
+import locale
+import os
 
 __version__ = "0.0.4"
 
@@ -13,21 +13,17 @@ def main():
 	try:
 		parseargs()
 		file1, file2 = args.filenames
+		env = os.environ.copy()
+		env['LC_ALL'] = args.encoding
+		language_code, encoding = args.encoding.split('.')
+		sort_cmd = sum([["-k{0},{0}".format(str(key))] for key in args.keys], ["sort", "-u", "-t", args.delimiter])
 
-		with open(file1, mode='r') as fp1, \
-			open(file2, mode='r') as fp2, \
-			tempfile.TemporaryFile("w+") as sorted_fp1, \
-			tempfile.TemporaryFile("w+") as sorted_fp2:
+		with open(file1, mode='rb') as fp1, \
+			open(file2, mode='rb') as fp2, \
+			subprocess.Popen(sort_cmd, env=env, stdin=fp1, stdout=subprocess.PIPE, text=True, encoding=encoding) as proc1, \
+			subprocess.Popen(sort_cmd, env=env, stdin=fp2, stdout=subprocess.PIPE, text=True, encoding=encoding) as proc2:
 
-			sort_args = sum([["-k{0},{0}".format(str(key))] for key in args.keys], ["-u", "-t", args.delimiter])
-
-			external_sort(fp1, sorted_fp1, sort_args)
-			external_sort(fp2, sorted_fp2, sort_args)
-
-			sorted_fp1.seek(0)
-			sorted_fp2.seek(0)
-
-			mergecmp(sorted_fp1, sorted_fp2)
+			mergecmp(proc1.stdout, proc2.stdout, encoding)
 
 		return 0
 	except Exception as e:
@@ -51,6 +47,10 @@ def parseargs():
 		metavar="DELIMITER", default=' ',
 		help="use DELIMITER as the field separator character\n(default: the blank character)")
 
+	parser.add_argument("-e", "--encoding", dest="encoding", action="store",
+		metavar="ENCODING", default='.'.join(locale.getlocale(locale.LC_ALL)),
+		help="use ENCODING as the file encoding\n")
+
 	parser.add_argument("--version", action="version", version="%(prog)s " + __version__)
 
 	args = parser.parse_args()
@@ -58,64 +58,67 @@ def parseargs():
 	if len(args.delimiter) != 1:
 		raise ValueError("DELIMITER must be a character")
 
-def external_sort(infp, outfp, args):
-	try:
-		return subprocess.run(["sort"] + args,
-			stdin=infp, stdout=outfp, check=True)
-	except FileNotFoundError:
-		raise FileNotFoundError("The sort utility must be installed on the system")
 
-def mergecmp(fp1, fp2):
-	buf1 = fp1.readline()
-	buf2 = fp2.readline()
+def mergecmp(fp1, fp2, outencoding):
 
-	while buf1 and buf2:
-		record1 = rstrip(buf1)
-		record2 = rstrip(buf2)
+	sys.stdout.reconfigure(encoding=outencoding)
+
+	record1 = readline(fp1)
+	record2 = readline(fp2)
+
+	while record1 and record2:
 
 		keys1 = getkeys(record1)
 		keys2 = getkeys(record2)
 
 		if keys2 < keys1:
 			printadded(record2)
-			buf2 = fp2.readline()
+			record2 = readline(fp2)
 
 		elif keys2 > keys1:
 			printdeleted(record1)
-			buf1 = fp1.readline()
+			record1 = readline(fp1)
 
 		else:
 			if record1 != record2:
 				printchanged(record1, record2)
-			buf1 = fp1.readline()
-			buf2 = fp2.readline()
+			record1 = readline(fp1)
+			record2 = readline(fp2)
 
-	if buf1:
-		printdeleted(rstrip(buf1))
-	for line in fp1:
-		printdeleted(rstrip(line))
+	while record1:
+		printdeleted(record1)
+		record1 = readline(fp1)
 
-	if buf2:
-		printadded(rstrip(buf2))
-	for line in fp2:
-		printadded(rstrip(line))
+	while record2:
+		printadded(record2)
+		record2 = readline(fp2)
+
+
+def readline(fp):
+	"""
+	line is either str with '\n' or None, so after splitting, the last key will be (KEYS[-1] + '\n')
+	if file end without '\n', '\n' will be added to the last line
+	NOTE: some sort utility will always output '\n' at file end whether the original file contains '\n' at file end
+	"""
+	line = fp.readline()
+	if not line: return None
+	if line[-1] != '\n':
+		line += '\n'
+	return line
 
 def getkeys(line):
 	columns = line.split(args.delimiter)
 	return [columns[i - 1] for i in args.keys]
 
-def rstrip(s):
-	return s.rstrip("\n")
-
 def printadded(line):
-	print('+', line)
+	print('+', line, end='')
 
 def printdeleted(line):
-	print('-', line)
+	print('-', line, end='')
 
 def printchanged(original, changed):
-	print('*', original)
-	print('>', changed)
+	print('*', original, end='')
+	print('>', changed, end='')
 
 if __name__ == "__main__":
 	exit(main())
