@@ -4,6 +4,8 @@
 import sys
 import subprocess
 import argparse
+import locale
+import os
 
 __version__ = "0.0.4"
 
@@ -11,14 +13,17 @@ def main():
 	try:
 		parseargs()
 		file1, file2 = args.filenames
+		env = os.environ.copy()
+		env['LC_ALL'] = args.encoding
+		language_code, encoding = args.encoding.split('.')
 		sort_cmd = sum([["-k{0},{0}".format(str(key))] for key in args.keys], ["sort", "-u", "-t", args.delimiter])
 
-		with open(file1, mode='r') as fp1, \
-			open(file2, mode='r') as fp2, \
-			subprocess.Popen(sort_cmd, stdin=fp1, stdout=subprocess.PIPE, text=True, encoding="UTF-8") as proc1, \
-			subprocess.Popen(sort_cmd, stdin=fp2, stdout=subprocess.PIPE, text=True, encoding="UTF-8") as proc2:
+		with open(file1, mode='rb') as fp1, \
+			open(file2, mode='rb') as fp2, \
+			subprocess.Popen(sort_cmd, env=env, stdin=fp1, stdout=subprocess.PIPE, text=True, encoding=encoding) as proc1, \
+			subprocess.Popen(sort_cmd, env=env, stdin=fp2, stdout=subprocess.PIPE, text=True, encoding=encoding) as proc2:
 
-			mergecmp(proc1.stdout, proc2.stdout)
+			mergecmp(proc1.stdout, proc2.stdout, encoding)
 
 		return 0
 	except Exception as e:
@@ -42,6 +47,10 @@ def parseargs():
 		metavar="DELIMITER", default=' ',
 		help="use DELIMITER as the field separator character\n(default: the blank character)")
 
+	parser.add_argument("-e", "--encoding", dest="encoding", action="store",
+		metavar="ENCODING", default='.'.join(locale.getlocale(locale.LC_ALL)),
+		help="use ENCODING as the file encoding\n")
+
 	parser.add_argument("--version", action="version", version="%(prog)s " + __version__)
 
 	args = parser.parse_args()
@@ -50,7 +59,10 @@ def parseargs():
 		raise ValueError("DELIMITER must be a character")
 
 
-def mergecmp(fp1, fp2):
+def mergecmp(fp1, fp2, outencoding):
+
+	sys.stdout.reconfigure(encoding=outencoding)
+
 	record1 = readline(fp1)
 	record2 = readline(fp2)
 
