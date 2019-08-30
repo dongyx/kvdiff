@@ -1,6 +1,6 @@
 import setuptools
 
-from kvdiff.kvdiff import __version__ as version
+from src.kvdiff.kvdiff import __version__ as version
 
 with open("README.md", 'r') as fp:
 	longdesc = fp.read()
@@ -14,7 +14,8 @@ setuptools.setup(
 	long_description=longdesc,
 	long_description_content_type="text/markdown",
 	url="https://github.com/dongyx/kvdiff",
-	packages=setuptools.find_packages(),
+	packages=setuptools.find_packages("src"),
+	package_dir={"kvdiff": "src/kvdiff"},
 	entry_points={
 		"console_scripts": [
 			"kvdiff=kvdiff.kvdiff:main"
