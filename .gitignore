@@ -1,5 +1,7 @@
 /dist
 /build
-/*.egg-info
+*.egg-info
 __pycache__
+
+*.swp
 .DS_Store

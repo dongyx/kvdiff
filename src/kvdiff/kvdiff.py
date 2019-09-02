@@ -25,11 +25,12 @@ def main():
 		return 0
 		
 	except Exception as e:
+		raise
 		print(e, file=sys.stderr)
 		return -1
 
 def parseargs():
-	global parser, args
+	global args
 
 	parser = argparse.ArgumentParser(
 		description="Compare two text files by key columns",
@@ -38,12 +39,15 @@ def parseargs():
 	parser.add_argument(dest="filenames", metavar="FILENAME", nargs=2)
 
 	parser.add_argument("-k", "--key", dest="keys", action="append",
-		type=int, metavar="KEY", required=True,
-		help="specify the KEY-th column as one of the key columns; can be specified multiple times")
+		type=int, metavar="KEY", default=[1],
+		help="specify the KEY-th column as one of the key columns; can be specified multiple times\n(default: 1)")
 
 	parser.add_argument("-d", "--delimiter", dest="delimiter", action="store",
 		metavar="DELIMITER", default=' ',
 		help="use DELIMITER as the field separator character\n(default: the blank character)")
+
+	parser.add_argument("-l", "--line", action="store_true",
+		help="print the modified record in one line") 
 
 	parser.add_argument("--version", action="version", version="%(prog)s " + __version__)
 
@@ -123,8 +127,11 @@ def printdeleted(line):
 	output('-', line)
 
 def printchanged(original, changed):
-	output('*', original)
-	output('>', changed)
+	if args.line:
+		output('*', original.rstrip('\n'), '>', changed)
+	else:
+		output('*', original)
+		output('>', changed)
 
 if __name__ == "__main__":
 	exit(main())
