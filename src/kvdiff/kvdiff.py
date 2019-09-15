@@ -25,7 +25,6 @@ def main():
 		return 0
 		
 	except Exception as e:
-		raise
 		print(e, file=sys.stderr)
 		return -1
 

@@ -2,7 +2,7 @@
 
 Compare two text files by key columns
 
-# Get Started
+# Getting Started
 
 Let's say we have two text files maintaining a list of systems with versions.
 
@@ -49,6 +49,6 @@ Run `kvdiff --help` for more infomation
 
 MIT licensed
 
-# Technical details
+# How It Works
 
-See [KVDiff: Compare Two Large Text Files by Key Columns](http://yxdong.me/posts/kvdiff.html)
+[KVDiff: Compare Two Large Text Files by Key Columns](http://yxdong.me/posts/kvdiff.html)
