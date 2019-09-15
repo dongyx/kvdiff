@@ -5,7 +5,7 @@ import sys
 import subprocess
 import argparse
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 
 def main():
 	try:
@@ -61,7 +61,7 @@ def external_sort(fp):
 
 	try:
 		return subprocess.Popen(sort_cmd,
-			stdin=fp, stdout=subprocess.PIPE, text=True)
+			stdin=fp, stdout=subprocess.PIPE, universal_newlines=True)
 
 	except FileNotFoundError:
 		raise FileNotFoundError("sort(1) must be installed")

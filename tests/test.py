@@ -8,7 +8,7 @@ class TestAll(unittest.TestCase):
 	def testall(self):
 		return subprocess.run(["bash", "tests/test.sh"],
 			stdin=subprocess.DEVNULL,
-			stdout=subprocess.DEVNULL,
-			stderr=subprocess.DEVNULL,
+			# stdout=subprocess.DEVNULL,
+			# stderr=subprocess.DEVNULL,
 			check=True
 		)
