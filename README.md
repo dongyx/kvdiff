@@ -51,4 +51,4 @@ MIT licensed
 
 # How It Works
 
-[KVDiff: Compare Two Large Text Files by Key Columns](http://yxdong.me/posts/kvdiff.html)
+[KVDiff: Compare Two Large Text Files by Key Columns](http://yuxuandong.com/posts/kvdiff.html)
