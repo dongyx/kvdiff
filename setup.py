@@ -8,8 +8,8 @@ with open("README.md", 'r') as fp:
 setuptools.setup(
 	name="kvdiff",
 	version=version,
-	author="Yuxuan Dong",
-	author_email="yuxuan.dong@outlook.com",
+	author="DONG Yuxuan",
+	author_email="dong.yuxuan@outlook.com",
 	description="Compare two text files by key columns",
 	long_description=longdesc,
 	long_description_content_type="text/markdown",

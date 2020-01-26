@@ -5,7 +5,7 @@ import sys
 import subprocess
 import argparse
 
-__version__ = "0.2.3"
+__version__ = "0.2.4"
 
 def main():
 	try:
